@@ -35,6 +35,7 @@ start_http_server(options.prometheus_server_port, addr='0.0.0.0')
 crypto_price_gauge = Gauge('crypto_price', 'Price of Crypto', ['currency'])
 crypto_wallet_balance_gauge = Gauge('crypto_wallet_balance', 'Wallet balance of Crypto', ['currency', 'wallet_address'])
 crypto_value_gauge = Gauge('crypto_value', 'Value of Crypto wallet', ['currency', 'wallet_address'])
+crypto_total_value_gauge = Gauge('crypto_total_value', 'Value of all Crypto wallets')
 
 while True:
   total = 0
@@ -54,5 +55,6 @@ while True:
     crypto_value_gauge.labels(address[0], address[1]).set(price * balance)
 
   print("total: $%.2f" % total)
+  crypto_total_value_gauge.set(total)
 
   [ time.sleep(1) for x in range(options.update_interval) ]
