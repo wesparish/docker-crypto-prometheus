@@ -5,13 +5,13 @@ RUN apt-get update && \
     apt-get autoremove -y && \
     apt-get clean
 
-ADD requirements.txt /
+ADD crypto-prometheus/requirements.txt /
 RUN pip3 install -r requirements.txt
 
 ENV LOG_LEVEL="WARN" LC_ALL=C.UTF-8 LANG=C.UTF-8
 
-ADD lib /lib
-COPY crypto-prometheus.py /crypto-prometheus.py
+ADD crypto-prometheus/lib /lib
+COPY crypto-prometheus/crypto-prometheus.py /crypto-prometheus.py
 RUN chown root:root crypto-prometheus.py
 
 EXPOSE 5000
