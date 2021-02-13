@@ -28,8 +28,8 @@ parser.add_option("-i", "--update-interval",
 print("options: %s" % options)
 
 for address in os.getenv('CRYPTO_PROMETHEUS_ADDRESSES', '').split(','):
-  options.addresses.append((address.split(' ')[0],
-                            address.split(' ')[1]))
+  options.addresses.append((address.strip().split(' ')[0],
+                            address.strip().split(' ')[1]))
 
 start_http_server(options.prometheus_server_port, addr='0.0.0.0')
 crypto_price_gauge = Gauge('crypto_price', 'Price of Crypto', ['currency'])
