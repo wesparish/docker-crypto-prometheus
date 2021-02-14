@@ -1,3 +1,4 @@
 python-dateutil
 moneywagon
 prometheus-client
+cbpro

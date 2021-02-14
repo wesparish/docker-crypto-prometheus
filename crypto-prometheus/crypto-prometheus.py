@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
+'''
+Example -a/--address options:
+-a btc 1234
+-a eth 0x1234
+-a coinbase_pro btc:key:passphrase:secret
+-a coinbase_pro eth:key:passphrase:secret
+'''
 
 from optparse import OptionParser
 from lib.eth import Eth
 from lib.btc import Btc
+from lib.coinbase_pro import CoinbasePro
 
 import logging
 import os
@@ -27,9 +35,10 @@ parser.add_option("-i", "--update-interval",
 
 print("options: %s" % options)
 
-for address in os.getenv('CRYPTO_PROMETHEUS_ADDRESSES', '').split(','):
-  options.addresses.append((address.strip().split(' ')[0],
-                            address.strip().split(' ')[1]))
+if os.getenv('CRYPTO_PROMETHEUS_ADDRESSES', ''):
+  for address in os.getenv('CRYPTO_PROMETHEUS_ADDRESSES', '').split(','):
+    options.addresses.append((address.strip().split(' ')[0],
+                              address.strip().split(' ')[1]))
 
 start_http_server(options.prometheus_server_port, addr='0.0.0.0')
 crypto_price_gauge = Gauge('crypto_price', 'Price of Crypto', ['currency'])
@@ -40,21 +49,30 @@ crypto_total_value_gauge = Gauge('crypto_total_value', 'Value of all Crypto wall
 while True:
   total = 0
   for address in options.addresses:
-    currency_processor = { 
-      "eth": Eth(address[1]),
-      "btc": Btc(address[1])
-    }.get(address[0].lower(), None)
-    price = currency_processor.get_current_price()
-    balance = currency_processor.get_wallet_balance()
-    print("[%s %s] price: %s, balance: %s, value: $%.2f" % (address[0], address[1], 
-                                                            price, balance, price*balance))
-    total = total + price * balance
+    if address[0].lower() == 'eth':
+      currency_processor = Eth(address[1])
+    elif address[0].lower() == 'btc':
+      currency_processor = Btc(address[1])
+    elif address[0].lower() == 'coinbase_pro':
+      currency_processor = CoinbasePro(address[1].split(':')[0],
+                                       address[1].split(':')[1],
+                                       address[1].split(':')[2],
+                                       address[1].split(':')[3])
+    else:
+      currency_processor = None
 
-    crypto_price_gauge.labels(address[0]).set(price)
-    crypto_wallet_balance_gauge.labels(address[0], address[1]).set(balance)
-    crypto_value_gauge.labels(address[0], address[1]).set(price * balance)
+    if currency_processor:
+      price = currency_processor.get_current_price()
+      balance = currency_processor.get_wallet_balance()
+      print("[%s %s] price: %s, balance: %s, value: $%.2f" % (address[0], address[1], 
+                                                              price, balance, price*balance), print=True)
+      total = total + price * balance
 
-  print("total: $%.2f" % total)
+      crypto_price_gauge.labels(address[0]).set(price)
+      crypto_wallet_balance_gauge.labels(address[0], address[1]).set(balance)
+      crypto_value_gauge.labels(address[0], address[1]).set(price * balance)
+
+  print("total: $%.2f" % total, print=True)
   crypto_total_value_gauge.set(total)
 
   [ time.sleep(1) for x in range(options.update_interval) ]
