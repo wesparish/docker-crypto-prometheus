@@ -19,7 +19,7 @@ class Eth(CryptoBase):
     from moneywagon.services import Bittrex
     client = Bittrex()
 
-    for i in range(self._query_loops):
+    while True:
       try:
         value = client.get_current_price('eth', 'usd')
         break
@@ -33,7 +33,7 @@ class Eth(CryptoBase):
     from moneywagon.services import Etherscan
     client = Etherscan()
 
-    for i in range(self._query_loops):
+    while True:
       try:
         value = client.get_balance('eth', self._address)
         break

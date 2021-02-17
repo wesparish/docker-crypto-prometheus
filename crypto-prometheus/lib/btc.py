@@ -20,7 +20,7 @@ class Btc(CryptoBase):
     from moneywagon.services import Bittrex
     client = Bittrex()
 
-    for i in range(self._query_loops):
+    while True:
       try:
         value = client.get_current_price('btc', 'usd')
         break
@@ -34,7 +34,7 @@ class Btc(CryptoBase):
     from moneywagon.services import BlockChainInfo
     client = BlockChainInfo()
 
-    for i in range(self._query_loops):
+    while True:
       try:
         value = client.get_balance('btc', self._address)
         break
