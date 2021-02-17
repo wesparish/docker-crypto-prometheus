@@ -15,10 +15,32 @@ class Btc(CryptoBase):
     super(Btc, self).__init__(address)
 
   def get_current_price(self):
-    return get_current_price('btc', 'usd')
+    value = None
+    
+    from moneywagon.services import Bittrex
+    client = Bittrex()
+
+    for i in range(self._query_loops):
+      try:
+        value = client.get_current_price('btc', 'usd')
+        break
+      except Exception as ex:
+        print("Caught exception in get_current_price: %s" % ex)
+    return value
 
   def get_wallet_balance(self):
-    return get_address_balance('btc', self._address)
+    value = None
+    
+    from moneywagon.services import BlockChainInfo
+    client = BlockChainInfo()
+
+    for i in range(self._query_loops):
+      try:
+        value = client.get_balance('btc', self._address)
+        break
+      except Exception as ex:
+        print("Caught exception in get_wallet_balance: %s" % ex)
+    return value
 
 if __name__ == "__main__":
   import os

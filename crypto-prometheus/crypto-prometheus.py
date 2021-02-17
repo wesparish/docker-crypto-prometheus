@@ -62,17 +62,20 @@ while True:
       currency_processor = None
 
     if currency_processor:
-      price = currency_processor.get_current_price()
-      balance = currency_processor.get_wallet_balance()
+      try:
+        price = currency_processor.get_current_price()
+        balance = currency_processor.get_wallet_balance()
+      except Exception as ex:
+        print("Caught exception: %s" % ex)
       print("[%s %s] price: %s, balance: %s, value: $%.2f" % (address[0], address[1], 
-                                                              price, balance, price*balance), print=True)
+                                                              price, balance, price*balance), flush=True)
       total = total + price * balance
 
       crypto_price_gauge.labels(address[0]).set(price)
       crypto_wallet_balance_gauge.labels(address[0], address[1]).set(balance)
       crypto_value_gauge.labels(address[0], address[1]).set(price * balance)
 
-  print("total: $%.2f" % total, print=True)
+  print("total: $%.2f" % total, flush=True)
   crypto_total_value_gauge.set(total)
 
   [ time.sleep(1) for x in range(options.update_interval) ]
