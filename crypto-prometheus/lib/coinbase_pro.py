@@ -29,26 +29,33 @@ if __name__ == "__main__":
   print("Testing %s" % (os.path.basename(__file__)))
 
   cbpro_address = os.getenv('COINBASE_PRO_ADDRESS')
-  api_key = cbpro_address.split(':')[0]
-  secret = cbpro_address.split(':')[1]
-  passphrase = cbpro_address.split(':')[2]
+  currency_type = cbpro_address.split(':')[0]
+  api_key = cbpro_address.split(':')[1]
+  secret = cbpro_address.split(':')[2]
+  passphrase = cbpro_address.split(':')[3]
+
+  print("Testing with currency_type: %s, api_key: %s, secret: %s, passphrase: %s" % \
+          (currency_type,
+          api_key,
+          secret,
+          passphrase))
 
   import unittest
   class TestCoinbasePro(unittest.TestCase):
     def setUp(self):
-      self.cbpro = CoinbasePro('btc', api_key, secret, passphrase)
+      self.cbpro = CoinbasePro(currency_type, api_key, secret, passphrase)
 
     def tearDown(self):
       pass
 
     def test_get_price_from_api(self):
       current_price = self.cbpro.get_current_price()
-      print("current_price (btc): %s" % current_price)
+      print("current_price (%s): %s" % (currency_type, current_price))
       assert current_price > 0
 
     def test_get_wallet_balance(self):
       wallet_balance = self.cbpro.get_wallet_balance()
-      print("wallet_balance (btc): %s" % wallet_balance)
+      print("wallet_balance (%s): %s" % (currency_type, wallet_balance))
       assert wallet_balance > 0
 
   unittest.main()
