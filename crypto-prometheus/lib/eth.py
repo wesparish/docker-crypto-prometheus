@@ -19,12 +19,16 @@ class Eth(CryptoBase):
     from moneywagon.services import Bittrex
     client = Bittrex()
 
+    try_count = 0
     while True:
       try:
         value = client.get_current_price('eth', 'usd')
         break
       except Exception as ex:
         print("Caught exception in get_current_price: %s" % ex)
+        try_count += 1
+        if try_count > 5:
+          raise
     return value
 
   def get_wallet_balance(self):
@@ -33,12 +37,16 @@ class Eth(CryptoBase):
     from moneywagon.services import Etherscan
     client = Etherscan()
 
+    try_count = 0
     while True:
       try:
         value = client.get_balance('eth', self._address)
         break
       except Exception as ex:
         print("Caught exception in get_wallet_balance: %s" % ex)
+        try_count += 1
+        if try_count > 5:
+          raise
     return value
 
 if __name__ == "__main__":

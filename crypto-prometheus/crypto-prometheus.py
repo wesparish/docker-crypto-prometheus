@@ -12,6 +12,7 @@ from lib.eth import Eth
 from lib.btc import Btc
 from lib.coinbase_pro import CoinbasePro
 
+import datetime
 import logging
 import os
 import sys
@@ -45,6 +46,7 @@ crypto_price_gauge = Gauge('crypto_price', 'Price of Crypto', ['currency'])
 crypto_wallet_balance_gauge = Gauge('crypto_wallet_balance', 'Wallet balance of Crypto', ['currency', 'wallet_address'])
 crypto_value_gauge = Gauge('crypto_value', 'Value of Crypto wallet', ['currency', 'wallet_address'])
 crypto_total_value_gauge = Gauge('crypto_total_value', 'Value of all Crypto wallets')
+last_update_timestamp_gauge = Gauge('last_update_timestamp_s', 'UNIX timestamp in s of last update')
 
 while True:
   total = 0
@@ -62,11 +64,8 @@ while True:
       currency_processor = None
 
     if currency_processor:
-      try:
-        price = currency_processor.get_current_price()
-        balance = currency_processor.get_wallet_balance()
-      except Exception as ex:
-        print("Caught exception: %s" % ex)
+      price = currency_processor.get_current_price()
+      balance = currency_processor.get_wallet_balance()
       print("[%s %s] price: %s, balance: %s, value: $%.2f" % (address[0], address[1], 
                                                               price, balance, price*balance), flush=True)
       total = total + price * balance
@@ -77,5 +76,7 @@ while True:
 
   print("total: $%.2f" % total, flush=True)
   crypto_total_value_gauge.set(total)
+  last_update_timestamp_gauge.set_to_current_time()
+  last_update_timestamp_gauge._documentation = "Last update: %s" % (datetime.datetime.now())
 
   [ time.sleep(1) for x in range(options.update_interval) ]

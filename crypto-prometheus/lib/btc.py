@@ -20,12 +20,16 @@ class Btc(CryptoBase):
     from moneywagon.services import Bittrex
     client = Bittrex()
 
+    try_count = 0
     while True:
       try:
         value = client.get_current_price('btc', 'usd')
         break
       except Exception as ex:
         print("Caught exception in get_current_price: %s" % ex)
+        try_count += 1
+        if try_count > 5:
+          raise
     return value
 
   def get_wallet_balance(self):
@@ -34,12 +38,16 @@ class Btc(CryptoBase):
     from moneywagon.services import BlockChainInfo
     client = BlockChainInfo()
 
+    try_count = 0
     while True:
       try:
         value = client.get_balance('btc', self._address)
         break
       except Exception as ex:
         print("Caught exception in get_wallet_balance: %s" % ex)
+        try_count += 1
+        if try_count > 5:
+          raise
     return value
 
 if __name__ == "__main__":
